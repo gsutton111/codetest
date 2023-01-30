@@ -2,27 +2,33 @@ using UnityEngine;
 
 public class ShellExplosion : MonoBehaviour
 {
+    public static ShellExplosion instance;
+
     public LayerMask m_TankMask;                        // Used to filter what the explosion affects, this should be set to "Players".
     public ParticleSystem m_ExplosionParticles;         // Reference to the particles that will play on explosion.
     public AudioSource m_ExplosionAudio;                // Reference to the audio that will play on explosion.
 	public AudioEvent m_ExplosionAudioEvent;
+    /*
     public float m_MaxDamage = 100f;                    // The amount of damage done if the explosion is centred on a tank.
     public float m_ExplosionForce = 1000f;              // The amount of force added to a tank at the centre of the explosion.
     public float m_MaxLifeTime = 2f;                    // The time in seconds before the shell is removed.
     public float m_ExplosionRadius = 5f;                // The maximum distance away from the explosion tanks can be and are still affected.
+    */
 
 
     private void Start ()
     {
+        instance = this;
+
         // If it isn't destroyed by then, destroy the shell after it's lifetime.
-        Destroy (gameObject, m_MaxLifeTime);
+        Destroy (gameObject, TankShooting.instance.m_AmmoType.m_MaxLifeTime);
     }
 
 
     private void OnCollisionEnter (Collision collision)
     {
 		// Collect all the colliders in a sphere from the shell's current position to a radius of the explosion radius.
-        Collider[] colliders = Physics.OverlapSphere (transform.position, m_ExplosionRadius);
+        Collider[] colliders = Physics.OverlapSphere (transform.position, TankShooting.instance.m_AmmoType.m_ExplosionRadius);
 
         // Go through all the colliders...
         for (int i = 0; i < colliders.Length; i++)
@@ -33,7 +39,7 @@ public class ShellExplosion : MonoBehaviour
 	        if (targetRigidbody)
 	        {
 		        // Add an explosion force.
-		        targetRigidbody.AddExplosionForce(m_ExplosionForce, transform.position, m_ExplosionRadius);
+		        targetRigidbody.AddExplosionForce(TankShooting.instance.m_AmmoType.m_ExplosionForce, transform.position, TankShooting.instance.m_AmmoType.m_ExplosionRadius);
 	        }
 
 	        // Calculate the amount of damage the target should take based on it's distance from the shell.
@@ -73,10 +79,10 @@ public class ShellExplosion : MonoBehaviour
         float explosionDistance = explosionToTarget.magnitude;
 
         // Calculate the proportion of the maximum distance (the explosionRadius) the target is away.
-        float relativeDistance = (m_ExplosionRadius - explosionDistance) / m_ExplosionRadius;
+        float relativeDistance = (TankShooting.instance.m_AmmoType.m_ExplosionRadius - explosionDistance) / TankShooting.instance.m_AmmoType.m_ExplosionRadius;
 
         // Calculate damage as this proportion of the maximum possible damage.
-        float damage = relativeDistance * m_MaxDamage;
+        float damage = relativeDistance * TankShooting.instance.m_AmmoType.m_MaxDamage;
 
         // Make sure that the minimum damage is always 0.
         damage = Mathf.Max (0f, damage);

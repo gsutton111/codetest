@@ -9,6 +9,7 @@ public class PlayerControlledTank : TankBrain
 	private string m_MovementAxisName;
 	private string m_TurnAxisName;
 	private string m_FireButton;
+	private string m_SwitchAmmoButton;
 
 
 	public void OnEnable()
@@ -16,6 +17,7 @@ public class PlayerControlledTank : TankBrain
 		m_MovementAxisName = "Vertical" + PlayerNumber;
 		m_TurnAxisName = "Horizontal" + PlayerNumber;
 		m_FireButton = "Fire" + PlayerNumber;
+		m_SwitchAmmoButton = "Switch" + PlayerNumber;
 	}
 
 	public override void Think(TankThinker tank)
@@ -30,5 +32,9 @@ public class PlayerControlledTank : TankBrain
 			shooting.BeginChargingShot();
 		else
 			shooting.FireChargedShot();
+
+		if (Input.GetButtonDown(m_SwitchAmmoButton))
+			shooting.Switch();
+
 	}
 }
