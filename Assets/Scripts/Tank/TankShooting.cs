@@ -22,7 +22,7 @@ public class TankShooting : MonoBehaviour
         }
     }
 
-    Dictionary<string, m_AmmoInfo> m_Weapons = new Dictionary<string, m_AmmoInfo>();
+    public Dictionary<string, m_AmmoInfo> m_Weapons = new Dictionary<string, m_AmmoInfo>();
 
     public AmmoType m_AmmoType;                             // The currently selected ammo type
     public Rigidbody m_Shell;                               // Prefab of the shell.

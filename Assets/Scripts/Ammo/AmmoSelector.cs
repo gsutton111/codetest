@@ -66,7 +66,7 @@ public class AmmoSelector : MonoBehaviour
         sniper.m_FireRate = 0;
 
         sniper.m_CoolDown = 1.5f;
-        sniper.m_Ammo = 10;
+        sniper.m_Ammo = 0;
 
         m_AmmoTypes.Add(sniper);
 
@@ -85,7 +85,7 @@ public class AmmoSelector : MonoBehaviour
         grenade.m_FireRate = 0;
 
         grenade.m_CoolDown = 2f;
-        grenade.m_Ammo = 10;
+        grenade.m_Ammo = 0;
 
         m_AmmoTypes.Add(grenade);
 
@@ -104,7 +104,7 @@ public class AmmoSelector : MonoBehaviour
         automatic.m_FireRate = 10;
 
         automatic.m_CoolDown = 0f;
-        automatic.m_Ammo = 50;
+        automatic.m_Ammo = 0;
 
         m_AmmoTypes.Add(automatic);
     }
