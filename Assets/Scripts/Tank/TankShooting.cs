@@ -34,6 +34,7 @@ public class TankShooting : MonoBehaviour
 
     private float m_CurrentLaunchForce;                     // The force that will be given to the shell when the fire button is released.
     private float m_ChargeSpeed;                            // How fast the launch force increases, based on the max charge time.
+    private float m_FireRateTimer;
     private int m_AmmoTypeIndex;
     private bool m_Charging;
 
@@ -47,6 +48,7 @@ public class TankShooting : MonoBehaviour
         for (int i = 0; i < AmmoSelector.instance.m_AmmoTypes.Count; i++)
         {
             m_Weapons[AmmoSelector.instance.m_AmmoTypes[i].m_Name] = new m_AmmoInfo(AmmoSelector.instance.m_AmmoTypes[i].m_Ammo, 0f);
+            Debug.Log("Added: " + AmmoSelector.instance.m_AmmoTypes[i].m_Name);
         }
 
         // Set the starting ammo type to the default
@@ -92,36 +94,59 @@ public class TankShooting : MonoBehaviour
         // Set the aim slider's paramaters every time a new ammo type is selected
         m_AimSlider.minValue = m_AmmoType.m_MinLaunchForce;
         m_AimSlider.maxValue = m_AmmoType.m_MaxLaunchForce;
+
+        Debug.Log("Weapon switched to: " + m_AmmoType.m_Name);
     }
 
     public void BeginChargingShot()
     {
-        // If current ammo type is out of ammo or is on cooldown, or the player is already charging a shot, end function
         bool noFire()
         {
             return
                 m_Weapons[AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex].m_Name].m_AmmoSupply <= 0 ||
                 m_Weapons[AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex].m_Name].m_AmmoCooldown > 0 ||
-                m_Charging;
+                (m_AmmoType.m_FireRate == 0 && m_Charging);
         }
 
         if (noFire()) return;
 
-        m_CurrentLaunchForce = m_AmmoType.m_MinLaunchForce;
+        if (m_AmmoType.m_FireRate == 0) // If weapon is NOT automatic
+        {
+            // Start the launch force at the ammo type's minimum
+            m_CurrentLaunchForce = m_AmmoType.m_MinLaunchForce;
 
-        // Change the clip to the charging clip and start it playing.
-        m_ShootingAudio.clip = m_ChargingClip;
-        m_ShootingAudio.Play();
+            // Change the clip to the charging clip and start it playing.
+            m_ShootingAudio.clip = m_ChargingClip;
+            m_ShootingAudio.Play();
 
-        m_Charging = true;
+            m_Charging = true;
+        }
+        else // If weapon IS automatic
+        {
+            // Start counting for the fire rate
+            m_FireRateTimer += Time.deltaTime;
+
+            // Once enough time has passed to fire another round
+            if (m_FireRateTimer >= 1f / m_AmmoType.m_FireRate)
+            {
+                // Randomise the launch force between min and max values
+                m_CurrentLaunchForce = Random.Range(m_AmmoType.m_MinLaunchForce, m_AmmoType.m_MaxLaunchForce);
+                
+                m_FireRateTimer = 0f;       // Reset the fire rate counter
+                Fire();                     // Fire the shell
+            }
+        }
     }
 
     public void FireChargedShot()
     {
-        if (!m_Charging) return;
+        if (m_AmmoType.m_FireRate == 0) // If weapon is NOT automatic
+        {
+            if (!m_Charging) return;
 
-        Fire();
-        m_Charging = false;
+            Fire();
+            m_Charging = false;
+        }
     }
 
 
@@ -142,8 +167,7 @@ public class TankShooting : MonoBehaviour
     private void Fire()
     {
         // Create an instance of the shell and store a reference to it's rigidbody.
-        Rigidbody shellInstance =
-            Instantiate(m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
+        Rigidbody shellInstance = Instantiate(m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
 
         // Set the shell's velocity to the launch force in the fire position's forward direction.
         shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;

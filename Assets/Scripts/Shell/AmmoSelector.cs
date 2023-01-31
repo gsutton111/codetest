@@ -24,7 +24,7 @@ public class AmmoSelector : MonoBehaviour
         public int m_FireRate;                      // The amount of rounds fired per second (set to 0 for non-automatic fire)
         public float m_CoolDown;                    // The delay in seconds before the ammo can be fired again
 
-        public int m_Ammo;                          // The amount of ammo the player currently has
+        public int m_Ammo;                          // The amount of ammo the player starts with for this ammo type
     }
 
     public List<AmmoType> m_AmmoTypes = new List<AmmoType>();   // A list of all available ammo types
@@ -44,8 +44,10 @@ public class AmmoSelector : MonoBehaviour
         missile.m_MaxLaunchForce = 30f;
         missile.m_MaxChargeTime = 0.75f;
         missile.m_MaxAmmo = 30;
-        missile.m_Ammo = 30;
+        missile.m_FireRate = 0;
+
         missile.m_CoolDown = 1f;
+        missile.m_Ammo = 30;
 
         m_AmmoTypes.Add(missile);
 
@@ -61,8 +63,10 @@ public class AmmoSelector : MonoBehaviour
         sniper.m_MaxLaunchForce = 60f;
         sniper.m_MaxChargeTime = 1.5f;
         sniper.m_MaxAmmo = 10;
-        sniper.m_Ammo = 10;
+        sniper.m_FireRate = 0;
+
         sniper.m_CoolDown = 1.5f;
+        sniper.m_Ammo = 10;
 
         m_AmmoTypes.Add(sniper);
 
@@ -78,9 +82,30 @@ public class AmmoSelector : MonoBehaviour
         grenade.m_MaxLaunchForce = 10f;
         grenade.m_MaxChargeTime = 0.75f;
         grenade.m_MaxAmmo = 10;
-        grenade.m_Ammo = 10;
+        grenade.m_FireRate = 0;
+
         grenade.m_CoolDown = 2f;
+        grenade.m_Ammo = 10;
 
         m_AmmoTypes.Add(grenade);
+
+
+        AmmoType automatic = new AmmoType();
+        automatic.m_Name = "Automatic";
+        automatic.m_MaxDamage = 25f;
+        automatic.m_ExplosionForce = 10f;
+        automatic.m_MaxLifeTime = 2f;
+        automatic.m_ExplosionRadius = 1f;
+
+        automatic.m_MinLaunchForce = 20f;
+        automatic.m_MaxLaunchForce = 25f;
+        automatic.m_MaxChargeTime = 0f;
+        automatic.m_MaxAmmo = 30;
+        automatic.m_FireRate = 10;
+
+        automatic.m_CoolDown = 0f;
+        automatic.m_Ammo = 50;
+
+        m_AmmoTypes.Add(automatic);
     }
 }
