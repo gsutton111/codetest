@@ -8,18 +8,21 @@ using static AmmoSelector;
 public class AmmoSupply : MonoBehaviour
 {
     public AmmoSelector.AmmoType type;
+    private MeshRenderer meshRenderer;
     
     // Start is called before the first frame update
     void Awake()
     {
         enabled = false;
+        meshRenderer = GetComponent<MeshRenderer>();
     }
 
     // Update is called once per frame
-    public void Setup(AmmoSelector.AmmoType ammoType, Transform spawnPoint)
+    public void Setup(AmmoSelector.AmmoType ammoType, UnityEngine.Vector3 spawnPoint, Material colour)
     {
-        transform.position = spawnPoint.position;
-        transform.rotation = spawnPoint.rotation;
+        transform.position = spawnPoint;
+
+        meshRenderer.material = colour;
 
         type = ammoType;
 
@@ -39,7 +42,7 @@ public class AmmoSupply : MonoBehaviour
         tank.m_Weapons[AmmoSelector.instance.m_AmmoTypes[i].m_Name].m_AmmoSupply = type.m_MaxAmmo;
         Debug.Log(type.m_Name + " ammo is now: " + tank.m_Weapons[AmmoSelector.instance.m_AmmoTypes[i].m_Name].m_AmmoSupply);
 
-        AmmoSpawnManager.instance.AmmoSpawnPoints.Add(transform);
+        AmmoSpawnManager.instance.AmmoSpawnPoints.Add(gameObject.transform.position);
         Destroy(gameObject);
     }
 }
