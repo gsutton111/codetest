@@ -1,4 +1,6 @@
-﻿using Boo.Lang;
+﻿//using Boo.Lang;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static AmmoSelector;
@@ -7,120 +9,154 @@ public class TankShooting : MonoBehaviour
 {
     public static TankShooting instance;
 
-    public Rigidbody m_Shell;                   // Prefab of the shell.
-    public Transform m_FireTransform;           // A child of the tank where the shells are spawned.
-    public Slider m_AimSlider;                  // A child of the tank that displays the current launch force.
-    public AudioSource m_ShootingAudio;         // Reference to the audio source used to play the shooting audio. NB: different to the movement audio source.
-    public AudioClip m_ChargingClip;            // Audio that plays when each shot is charging up.
-    public AudioClip m_FireClip;                // Audio that plays when each shot is fired.
-    /*
-    public float m_MinLaunchForce = 15f;        // The force given to the shell if the fire button is not held.
-    public float m_MaxLaunchForce = 30f;        // The force given to the shell if the fire button is held for the max charge time.
-    public float m_MaxChargeTime = 0.75f;       // How long the shell can charge for before it is fired at max force.
-    public int m_MaxAmmo = 30;                  // The max number of shots a player can fire in a round
-
-    private int m_Ammo = 30;                    // The amount of ammo the player currently has
-    */
-    private float m_CurrentLaunchForce;         // The force that will be given to the shell when the fire button is released.
-    private float m_ChargeSpeed;                // How fast the launch force increases, based on the max charge time.
-    private bool m_Charging;
-
-    private List<int> m_Ammo = new List<int>();
-    public AmmoType m_AmmoType;
-
-    public bool IsCharging
-	{
-		get { return m_Charging; }
-	}
-	
-    private void OnEnable()
+    public class m_AmmoInfo
     {
-        m_AmmoType = AmmoSelector.instance.m_AmmoTypes[0]; // Set the starting ammo type to the default
+        public int m_AmmoSupply;                            // The amount of ammo remaining for the weapon
+        public float m_AmmoCooldown;                        // The current cooldown remaining for the weapon
 
-        // When the tank is turned on, reset the launch force, the UI and ammo
-        m_CurrentLaunchForce = m_AmmoType.m_MinLaunchForce;
-        m_AimSlider.value = m_AmmoType.m_MinLaunchForce;
-        for (int i = 0; i < AmmoSelector.instance.m_AmmoTypes.Count; i++)
+        // Constructor to initialise the weapon data
+        public m_AmmoInfo(int ammo, float cooldown)
         {
-            m_Ammo.Add(AmmoSelector.instance.m_AmmoTypes[i].m_Ammo);
+            m_AmmoSupply = ammo;                            // Set the ammo remaining for the weapon
+            m_AmmoCooldown = cooldown;                      // Set the cooldown remaining for the weapon
         }
     }
 
+    Dictionary<string, m_AmmoInfo> m_Weapons = new Dictionary<string, m_AmmoInfo>();
 
-    private void Start ()
+    public AmmoType m_AmmoType;                             // The currently selected ammo type
+    public Rigidbody m_Shell;                               // Prefab of the shell.
+    public Transform m_FireTransform;                       // A child of the tank where the shells are spawned.
+    public Slider m_AimSlider;                              // A child of the tank that displays the current launch force.
+    public AudioSource m_ShootingAudio;                     // Reference to the audio source used to play the shooting audio. NB: different to the movement audio source.
+    public AudioClip m_ChargingClip;                        // Audio that plays when each shot is charging up.
+    public AudioClip m_FireClip;                            // Audio that plays when each shot is fired.
+
+    private float m_CurrentLaunchForce;                     // The force that will be given to the shell when the fire button is released.
+    private float m_ChargeSpeed;                            // How fast the launch force increases, based on the max charge time.
+    private int m_AmmoTypeIndex;
+    private bool m_Charging;
+
+    public bool IsCharging
     {
-        instance = this;
+        get { return m_Charging; }
+    }
+
+    private void OnEnable()
+    {
+        for (int i = 0; i < AmmoSelector.instance.m_AmmoTypes.Count; i++)
+        {
+            m_Weapons[AmmoSelector.instance.m_AmmoTypes[i].m_Name] = new m_AmmoInfo(AmmoSelector.instance.m_AmmoTypes[i].m_Ammo, 0f);
+        }
+
+        // Set the starting ammo type to the default
+        m_AmmoType = AmmoSelector.instance.m_AmmoTypes[0];
 
         // The rate that the launch force charges up is the range of possible forces by the max charge time.
-        //m_ChargeSpeed = (m_AmmoType.m_MaxLaunchForce - AmmoSelector.instance.m_AmmoType.m_MinLaunchForce) / AmmoSelector.instance.m_AmmoType.m_MaxChargeTime;
-        m_ChargeSpeed = 20;
+        m_ChargeSpeed = (m_AmmoType.m_MaxLaunchForce - m_AmmoType.m_MinLaunchForce) / m_AmmoType.m_MaxChargeTime;
+
+        // When the tank is turned on, set the slider's paramaters
+        m_AimSlider.value = m_AmmoType.m_MinLaunchForce;
+        m_AimSlider.minValue = m_AmmoType.m_MinLaunchForce;
+        m_AimSlider.maxValue = m_AmmoType.m_MaxLaunchForce;
+
+        // Reset the launch force, the UI and ammo
+        m_CurrentLaunchForce = m_AmmoType.m_MinLaunchForce;
+    }
+
+
+    private void Start()
+    {
+        instance = this;
+    }
+
+    IEnumerator StartCooldown(string weaponName, float cooldownTime)
+    {
+        m_Weapons[weaponName].m_AmmoCooldown = cooldownTime;
+
+        while (m_Weapons[weaponName].m_AmmoCooldown > 0)
+        {
+            yield return new WaitForEndOfFrame();
+            m_Weapons[weaponName].m_AmmoCooldown -= Time.deltaTime;
+        }
     }
 
     public void Switch()
     {
-        int i = AmmoSelector.instance.m_AmmoTypes.IndexOf(m_AmmoType);  // Find which position the current ammo type is in list of collected ammo types
-        int length = AmmoSelector.instance.m_AmmoTypes.Count;           // Determine how many ammo types the player owns
-        i++;                                                            // Move the index to the right of collected ammo types
-        if (i >= length) i = 0;                                         // Loop back around if the index goes out of range
-        m_AmmoType = AmmoSelector.instance.m_AmmoTypes[i];              // Set the ammo type to the new selected ammo
+        m_AmmoTypeIndex = AmmoSelector.instance.m_AmmoTypes.IndexOf(m_AmmoType);    // Find which position the current ammo type is in list of collected ammo types
+        int length = AmmoSelector.instance.m_AmmoTypes.Count;                       // Determine how many ammo types the player owns
+        m_AmmoTypeIndex++;                                                          // Move the index to the right of collected ammo types
+        if (m_AmmoTypeIndex >= length) m_AmmoTypeIndex = 0;                         // Loop back around if the index goes out of range
+        m_AmmoType = AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex];            // Set the ammo type to the new selected ammo
 
-        Debug.Log("Ammo type set to: " + AmmoSelector.instance.m_AmmoTypes[i]);
+        // Set the aim slider's paramaters every time a new ammo type is selected
+        m_AimSlider.minValue = m_AmmoType.m_MinLaunchForce;
+        m_AimSlider.maxValue = m_AmmoType.m_MaxLaunchForce;
     }
 
     public void BeginChargingShot()
-	{
-        int i = AmmoSelector.instance.m_AmmoTypes.IndexOf(m_AmmoType);
-        if (m_Ammo[i] <= 0 || m_Charging) return;
+    {
+        // If current ammo type is out of ammo or is on cooldown, or the player is already charging a shot, end function
+        bool noFire()
+        {
+            return
+                m_Weapons[AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex].m_Name].m_AmmoSupply <= 0 ||
+                m_Weapons[AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex].m_Name].m_AmmoCooldown > 0 ||
+                m_Charging;
+        }
 
-		m_CurrentLaunchForce = m_AmmoType.m_MinLaunchForce;
+        if (noFire()) return;
 
-		// Change the clip to the charging clip and start it playing.
-		m_ShootingAudio.clip = m_ChargingClip;
-		m_ShootingAudio.Play();
+        m_CurrentLaunchForce = m_AmmoType.m_MinLaunchForce;
 
-		m_Charging = true;
-	}
+        // Change the clip to the charging clip and start it playing.
+        m_ShootingAudio.clip = m_ChargingClip;
+        m_ShootingAudio.Play();
 
-	public void FireChargedShot()
-	{
-		if (!m_Charging) return;
+        m_Charging = true;
+    }
+
+    public void FireChargedShot()
+    {
+        if (!m_Charging) return;
 
         Fire();
-		m_Charging = false;
-	}
+        m_Charging = false;
+    }
 
 
-	private void Update()
-	{
-		if (m_Charging)
-		{
-			m_CurrentLaunchForce = Mathf.Min(m_AmmoType.m_MaxLaunchForce, m_CurrentLaunchForce + m_ChargeSpeed*Time.deltaTime);
-			m_AimSlider.value = m_CurrentLaunchForce;
-		}
-		else
-		{
-			m_AimSlider.value = m_AmmoType.m_MinLaunchForce;
-		}
-	}
+    private void Update()
+    {
+        if (m_Charging)
+        {
+            m_CurrentLaunchForce = Mathf.Min(m_AmmoType.m_MaxLaunchForce, m_CurrentLaunchForce + m_ChargeSpeed * Time.deltaTime);
+            m_AimSlider.value = m_CurrentLaunchForce;
+        }
+        else
+        {
+            m_AimSlider.value = m_AmmoType.m_MinLaunchForce;
+        }
+    }
 
 
-    private void Fire ()
+    private void Fire()
     {
         // Create an instance of the shell and store a reference to it's rigidbody.
         Rigidbody shellInstance =
-            Instantiate (m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
+            Instantiate(m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
 
         // Set the shell's velocity to the launch force in the fire position's forward direction.
-        shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward; 
+        shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
 
         // Change the clip to the firing clip and play it.
         m_ShootingAudio.clip = m_FireClip;
-        m_ShootingAudio.Play ();
+        m_ShootingAudio.Play();
 
         // Reset the launch force.  This is a precaution in case of missing button events.
         m_CurrentLaunchForce = m_AmmoType.m_MinLaunchForce;
 
-        int i = AmmoSelector.instance.m_AmmoTypes.IndexOf(m_AmmoType);
-        m_Ammo[i]--;
+        m_Weapons[AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex].m_Name].m_AmmoSupply--;
+        StartCoroutine(StartCooldown(AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex].m_Name, AmmoSelector.instance.m_AmmoTypes[m_AmmoTypeIndex].m_CoolDown));
+
     }
 }

@@ -8,6 +8,8 @@ public class AmmoSelector : MonoBehaviour
 
     public class AmmoType
     {
+        public string m_Name;
+
         // Variables for ShellExplosion.cs
         public float m_MaxDamage;                   // The amount of damage done if the explosion is centred on a tank.
         public float m_ExplosionForce;              // The amount of force added to a tank at the centre of the explosion.
@@ -19,6 +21,8 @@ public class AmmoSelector : MonoBehaviour
         public float m_MaxLaunchForce;              // The force given to the shell if the fire button is held for the max charge time.
         public float m_MaxChargeTime;               // How long the shell can charge for before it is fired at max force.
         public int m_MaxAmmo;                       // The max number of shots a player can fire in a round
+        public int m_FireRate;                      // The amount of rounds fired per second (set to 0 for non-automatic fire)
+        public float m_CoolDown;                    // The delay in seconds before the ammo can be fired again
 
         public int m_Ammo;                          // The amount of ammo the player currently has
     }
@@ -30,6 +34,7 @@ public class AmmoSelector : MonoBehaviour
         instance = this;
 
         AmmoType missile = new AmmoType();
+        missile.m_Name = "Missile";
         missile.m_MaxDamage = 100f;
         missile.m_ExplosionForce = 1000f;
         missile.m_MaxLifeTime = 2f;
@@ -40,11 +45,13 @@ public class AmmoSelector : MonoBehaviour
         missile.m_MaxChargeTime = 0.75f;
         missile.m_MaxAmmo = 30;
         missile.m_Ammo = 30;
+        missile.m_CoolDown = 1f;
 
         m_AmmoTypes.Add(missile);
 
 
         AmmoType sniper = new AmmoType();
+        sniper.m_Name = "Sniper";
         sniper.m_MaxDamage = 200f;
         sniper.m_ExplosionForce = 200f;
         sniper.m_MaxLifeTime = 2f;
@@ -55,11 +62,13 @@ public class AmmoSelector : MonoBehaviour
         sniper.m_MaxChargeTime = 1.5f;
         sniper.m_MaxAmmo = 10;
         sniper.m_Ammo = 10;
+        sniper.m_CoolDown = 1.5f;
 
         m_AmmoTypes.Add(sniper);
 
 
         AmmoType grenade = new AmmoType();
+        grenade.m_Name = "Grenade";
         grenade.m_MaxDamage = 250f;
         grenade.m_ExplosionForce = 2000f;
         grenade.m_MaxLifeTime = 5f;
@@ -70,6 +79,7 @@ public class AmmoSelector : MonoBehaviour
         grenade.m_MaxChargeTime = 0.75f;
         grenade.m_MaxAmmo = 10;
         grenade.m_Ammo = 10;
+        grenade.m_CoolDown = 2f;
 
         m_AmmoTypes.Add(grenade);
     }
