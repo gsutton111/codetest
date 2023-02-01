@@ -290,7 +290,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: ff21ff0ea9b18924bb1fdfbb0e58f5cb, type: 2}
   - {fileID: 2100000, guid: 463052f3f7389124f9e7b34b0b931d0d, type: 2}
   - {fileID: 2100000, guid: c39933e60e73205419d1f79a2af1fdac, type: 2}
-  - {fileID: 2100000, guid: 2ebf33c8c66048e4392138d1501e6be3, type: 2}
+  - {fileID: 2100000, guid: 4b4b25f923792ce4ab819907a4629058, type: 2}
   m_SupplyPrefab: {fileID: 1331183559829364959, guid: 6736ca10a8c9cb64a81ce7d5a8ad34f6,
     type: 3}
   m_AmmoStartDelay: 5
@@ -756,6 +756,8 @@ MonoBehaviour:
   m_MessageText: {fileID: 102963701}
   m_TankPrefab: {fileID: 114000011236013548, guid: 756d3a6506f2f8241b4e8badde68567a,
     type: 3}
+  m_DisplayPrefab: {fileID: 7564179306795388814, guid: 19b4c393ce1e6ff4c9809833292cfa62,
+    type: 3}
   SpawnPoints:
   - {fileID: 1976308491}
   - {fileID: 203089421}
@@ -768,6 +770,7 @@ MonoBehaviour:
   - {fileID: 2136835665}
   - {fileID: 1618060517}
   - {fileID: 1088663544}
+  m_Tanks: []
 --- !u!4 &1304999366
 Transform:
   m_ObjectHideFlags: 0

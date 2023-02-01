@@ -38,9 +38,7 @@ public class AmmoSupply : MonoBehaviour
         Debug.Log(tank);
 
         int i = AmmoSelector.instance.m_AmmoTypes.IndexOf(type);
-        Debug.Log(type.m_Name + " ammo was: " + tank.m_Weapons[AmmoSelector.instance.m_AmmoTypes[i].m_Name].m_AmmoSupply);
         tank.m_Weapons[AmmoSelector.instance.m_AmmoTypes[i].m_Name].m_AmmoSupply = type.m_MaxAmmo;
-        Debug.Log(type.m_Name + " ammo is now: " + tank.m_Weapons[AmmoSelector.instance.m_AmmoTypes[i].m_Name].m_AmmoSupply);
 
         AmmoSpawnManager.instance.AmmoSpawnPoints.Add(gameObject.transform.position);
         Destroy(gameObject);

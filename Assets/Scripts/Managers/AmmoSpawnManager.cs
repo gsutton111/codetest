@@ -28,9 +28,9 @@ public class AmmoSpawnManager : MonoBehaviour
         int i = Random.Range(0, AmmoSelector.instance.m_AmmoTypes.Count);   // Choose a random ammo type
         int j = Random.Range(0, AmmoSpawnPoints.Count);                     // Choose a random spawn location
 
-        var supply = Instantiate(m_SupplyPrefab);                               // Create the ammo supply crate
+        var supply = Instantiate(m_SupplyPrefab);                           // Create the ammo supply crate
         supply.Setup(AmmoSelector.instance.m_AmmoTypes[i], AmmoSpawnPoints[j], ammoColours[i]);
         Debug.Log("Spawned at location: " + j);
-        AmmoSpawnPoints.RemoveAt(j);                                            // Make sure there are no duplicate spawns
+        AmmoSpawnPoints.RemoveAt(j);                                        // Make sure there are no duplicate spawns
     }
 }

@@ -6,17 +6,24 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance;
     public int m_NumRoundsToWin = 5;            // The number of rounds a single player has to win to win the game.
     public float m_StartDelay = 3f;             // The delay between the start of RoundStarting and RoundPlaying phases.
     public float m_EndDelay = 3f;               // The delay between the end of RoundPlaying and RoundEnding phases.
     public CameraControl m_CameraControl;       // Reference to the CameraControl script for control during different phases.
     public Text m_MessageText;                  // Reference to the overlay Text to display winning text, etc.
     public TankThinker m_TankPrefab;             // Reference to the prefab the players will control.
+    public AmmoUI m_DisplayPrefab;             // Reference to the prefab that displays ammo information.
 	public Transform[] SpawnPoints;
         
     private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
     private WaitForSeconds m_EndWait;           // Used to have a delay whilst the round or game ends.
-	private List<TankThinker> m_Tanks; 
+	public List<TankThinker> m_Tanks; 
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     private void Start()
     {
@@ -44,7 +51,9 @@ public class GameManager : MonoBehaviour
 
 	        // ... create them, set their player number and references needed for control.
 	        var tank = Instantiate(m_TankPrefab);
+            var display = Instantiate(m_DisplayPrefab);
 	        tank.Setup(state, points[spawnPointIndex]);
+            display.Setup(tank);
 
 	        points.RemoveAt(spawnPointIndex);
 

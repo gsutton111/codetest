@@ -35,7 +35,7 @@ public class TankShooting : MonoBehaviour
     private float m_CurrentLaunchForce;                     // The force that will be given to the shell when the fire button is released.
     private float m_ChargeSpeed;                            // How fast the launch force increases, based on the max charge time.
     private float m_FireRateTimer;
-    private int m_AmmoTypeIndex;
+    public int m_AmmoTypeIndex;
     private bool m_Charging;
 
     public bool IsCharging
