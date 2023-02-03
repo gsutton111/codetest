@@ -16,13 +16,20 @@ public class AmmoUI : MonoBehaviour
     public Image typeBackground;
 
     private TankThinker m_Tank;
+    private TankHealth m_Health;
     private Color m_Colour;
     private TankShooting m_Shooting;
 
-    public void Setup(TankThinker tank)
+    public void Start()
+    {
+        TankHealth.OnDestroyAmmoDisplay += DestroyUI;
+    }
+
+    public void Setup(TankThinker tank, TankHealth health)
     {
         GetComponent<Canvas>().worldCamera = Camera.main;
         m_Tank = tank;
+        m_Health = health;
         m_Colour = tank.player.PlayerInfo.Color;
         m_Shooting = tank.GetComponent<TankShooting>();
 
@@ -53,5 +60,15 @@ public class AmmoUI : MonoBehaviour
         typeDisplay.color = m_Colour;
         typeBackground.sprite = ammoTypeSprites[m_Shooting.m_AmmoTypeIndex];
         typeDisplay.fillAmount = 1 - cd / AmmoSelector.instance.m_AmmoTypes[m_Shooting.m_AmmoTypeIndex].m_CoolDown;
+
+        if (m_Health.m_Dead)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void DestroyUI()
+    {
+        Destroy(gameObject);
     }
 }

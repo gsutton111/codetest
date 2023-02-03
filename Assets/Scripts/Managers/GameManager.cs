@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
 	        var tank = Instantiate(m_TankPrefab);
             var display = Instantiate(m_DisplayPrefab);
 	        tank.Setup(state, points[spawnPointIndex]);
-            display.Setup(tank);
+            display.Setup(tank, tank.GetComponent<TankHealth>());
 
 	        points.RemoveAt(spawnPointIndex);
 

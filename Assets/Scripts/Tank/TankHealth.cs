@@ -14,11 +14,14 @@ public class TankHealth : MonoBehaviour
     private AudioSource m_ExplosionAudio;               // The audio source to play when the tank explodes.
     private ParticleSystem m_ExplosionParticles;        // The particle system the will play when the tank is destroyed.
     private float m_CurrentHealth;                      // How much health the tank currently has.
-    private bool m_Dead;                                // Has the tank been reduced beyond zero health yet?
+    public bool m_Dead;                                // Has the tank been reduced beyond zero health yet?
+
+    public delegate void DestroyAmmoDisplay();
+    public static event DestroyAmmoDisplay OnDestroyAmmoDisplay;
 
 
     private void Awake ()
-    {
+    { 
         // Instantiate the explosion prefab and get a reference to the particle system on it.
         m_ExplosionParticles = Instantiate (m_ExplosionPrefab).GetComponent<ParticleSystem> ();
 
@@ -67,7 +70,7 @@ public class TankHealth : MonoBehaviour
     }
 
 
-    private void OnDeath ()
+    public void OnDeath ()
     {
         // Set the flag so that this function is only called once.
         m_Dead = true;
@@ -86,5 +89,7 @@ public class TankHealth : MonoBehaviour
 
         // Turn the tank off.
         gameObject.SetActive (false);
+
+        OnDestroyAmmoDisplay?.Invoke();
     }
 }
